@@ -74,7 +74,17 @@ const Index = () => {
             DataForge<span className="text-primary">.ai</span>
           </h1>
         </div>
-        <span className="text-xs font-mono text-muted-foreground">data engineering artifact generator</span>
+        <span className="text-xs font-mono text-muted-foreground">
+  built by Neha Rani · 
+  <a 
+    href="https://www.linkedin.com/in/neha-rani-r" 
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-primary hover:underline ml-1"
+  >
+    Connect on LinkedIn ↗
+  </a>
+</span>
       </header>
 
       <ConfigBar
