@@ -30,6 +30,17 @@ export function CodePreview({ code, language, isStreaming }: CodePreviewProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownload = () => {
+    const ext = language === "sql" ? "sql" : language === "yaml" ? "yaml" : "py";
+    const blob = new Blob([extractedCode], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `artifact.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!extractedCode && !isStreaming) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
