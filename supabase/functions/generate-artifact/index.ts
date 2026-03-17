@@ -39,22 +39,34 @@ serve(async (req) => {
 
     const contextMessage = `Context: Generate a ${artifactType} artifact targeting the ${cloudStack.toUpperCase()} cloud stack.\n\nCLOUD PROVIDER INSTRUCTIONS (MANDATORY):\n${cloudServices[cloudStack] || cloudServices.aws}\nDo NOT reference services from other cloud providers. Every storage path, SDK import, connection string, and service reference MUST match the specified cloud provider.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "system", content: contextMessage },
-          ...messages,
-        ],
-        stream: true,
-      }),
+    const payload = JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: contextMessage },
+        ...messages,
+      ],
+      stream: true,
     });
+
+    const fetchWithRetry = async (retries = 2): Promise<Response> => {
+      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: payload,
+      });
+      if ((resp.status === 502 || resp.status === 503) && retries > 0) {
+        console.log(`Gateway returned ${resp.status}, retrying... (${retries} left)`);
+        await new Promise(r => setTimeout(r, 1000));
+        return fetchWithRetry(retries - 1);
+      }
+      return resp;
+    };
+
+    const response = await fetchWithRetry();
 
     if (!response.ok) {
       if (response.status === 429) {
