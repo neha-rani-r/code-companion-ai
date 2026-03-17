@@ -31,7 +31,13 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const contextMessage = `Context: The user wants a ${artifactType} artifact for ${cloudStack} cloud infrastructure.`;
+    const cloudServices: Record<string, string> = {
+      aws: "Use AWS services exclusively: S3 for object storage, Redshift for data warehousing, Glue for ETL orchestration, boto3 as the Python SDK. Use s3:// paths, IAM roles, and AWS-native connectors.",
+      gcp: "Use GCP services exclusively: Google Cloud Storage (GCS) for object storage, BigQuery for data warehousing, Dataproc for Spark. Use the google-cloud-storage and google-cloud-bigquery Python clients, gs:// paths, and service account auth.",
+      azure: "Use Azure services exclusively: ADLS Gen2 (abfss://) for object storage, Azure Synapse Analytics for data warehousing, azure-storage-blob and azure-identity Python SDKs. Use Azure-native connectors and managed identity auth.",
+    };
+
+    const contextMessage = `Context: Generate a ${artifactType} artifact targeting the ${cloudStack.toUpperCase()} cloud stack.\n\nCLOUD PROVIDER INSTRUCTIONS (MANDATORY):\n${cloudServices[cloudStack] || cloudServices.aws}\nDo NOT reference services from other cloud providers. Every storage path, SDK import, connection string, and service reference MUST match the specified cloud provider.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
