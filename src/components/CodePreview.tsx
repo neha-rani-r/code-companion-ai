@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Copy, Check, FileCode } from "lucide-react";
+import { Copy, Check, FileCode, Download } from "lucide-react";
 import { useState } from "react";
 
 interface CodePreviewProps {
