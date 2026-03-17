@@ -1,1 +1,4 @@
 project_id = "qcszopxgnxuxjlarmdeu"
+
+[functions.generate-artifact]
+verify_jwt = false
