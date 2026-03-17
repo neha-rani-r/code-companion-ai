@@ -1,6 +1,20 @@
-import type { ChatMessage } from "./types";
+const SYSTEM_PROMPT = `You are a senior data engineer 
+with 10+ years experience. Generate production-ready 
+code artifacts based on the user's description.
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-artifact`;
+Always include:
+- Proper error handling
+- Idempotency checks  
+- Inline comments
+- Cloud-specific services as instructed
+
+Format response as:
+## Code
+\`\`\`python or sql
+[code here]
+\`\`\`
+## Why this approach
+## Watch out for`;
 
 export async function streamArtifact({
   messages,
@@ -10,68 +24,83 @@ export async function streamArtifact({
   onDone,
   onError,
 }: {
-  messages: ChatMessage[];
+  messages: { role: string; content: string }[];
   artifactType: string;
   cloudStack: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
 }) {
-  const resp = await fetch(CHAT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-    },
-    body: JSON.stringify({ messages, artifactType, cloudStack }),
-  });
+  const cloudInstructions: Record<string, string> = {
+    aws: "Use AWS: S3, Redshift, Glue, boto3, s3:// paths",
+    gcp: "Use GCP: BigQuery, GCS, gs:// paths, google-cloud-bigquery",
+    azure: "Use Azure: ADLS Gen2, Synapse, abfss://, azure-storage-blob",
+  };
 
-  if (!resp.ok) {
-    const data = await resp.json().catch(() => ({ error: "Request failed" }));
-    onError(data.error || `Error ${resp.status}`);
-    return;
-  }
-
-  if (!resp.body) {
-    onError("No response stream");
-    return;
-  }
-
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let streamDone = false;
-
-  while (!streamDone) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    let newlineIndex: number;
-    while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-      let line = buffer.slice(0, newlineIndex);
-      buffer = buffer.slice(newlineIndex + 1);
-
-      if (line.endsWith("\r")) line = line.slice(0, -1);
-      if (line.startsWith(":") || line.trim() === "") continue;
-      if (!line.startsWith("data: ")) continue;
-
-      const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") {
-        streamDone = true;
-        break;
+  try {
+    const response = await fetch(
+      "https://api.anthropic.com/v1/messages",
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: `${SYSTEM_PROMPT}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack]}`,
+          messages: messages,
+          stream: true,
+        }),
       }
+    );
 
-      try {
-        const parsed = JSON.parse(jsonStr);
-        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) onDelta(content);
-      } catch {
-        buffer = line + "\n" + buffer;
-        break;
+    if (!response.ok) {
+      const err = await response.json();
+      onError(err.error?.message || "Generation failed");
+      return;
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split("\n")
+        .filter(l => l.startsWith("data: "));
+      
+      for (const line of lines) {
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === "content_block_delta") {
+            onDelta(parsed.delta?.text || "");
+          }
+        } catch {}
       }
     }
+    onDone();
+  } catch (e) {
+    onError("Failed to generate artifact");
   }
-
-  onDone();
 }
+```
+
+---
+
+## Then add your Claude API key
+
+In GitHub repo → **Settings** → **Secrets and variables** → **Actions** → add:
+```
+VITE_ANTHROPIC_API_KEY = your_claude_api_key
+```
+
+Get your free Claude API key at:
+```
+console.anthropic.com
