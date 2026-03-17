@@ -2,8 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-export default defineConfig(({ mode }) => ({
-  base: "/",
+export default defineConfig({
+  base: "/code-companion-ai/",
   server: {
     host: "::",
     port: 8080,
@@ -17,4 +17,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-}));
+});
