@@ -90,17 +90,4 @@ export async function streamArtifact({
     onError("Failed to generate artifact");
   }
 }
-```
 
----
-
-## Then add your Claude API key
-
-In GitHub repo → **Settings** → **Secrets and variables** → **Actions** → add:
-```
-VITE_ANTHROPIC_API_KEY = your_claude_api_key
-```
-
-Get your free Claude API key at:
-```
-console.anthropic.com
