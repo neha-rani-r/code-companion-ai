@@ -90,4 +90,3 @@ export async function streamArtifact({
     onError("Failed to generate artifact");
   }
 }
-
