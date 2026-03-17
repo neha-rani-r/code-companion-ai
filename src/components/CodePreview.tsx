@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Copy, Check, FileCode } from "lucide-react";
+import { Copy, Check, FileCode, Download } from "lucide-react";
 import { useState } from "react";
 
 interface CodePreviewProps {
@@ -30,6 +30,17 @@ export function CodePreview({ code, language, isStreaming }: CodePreviewProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownload = () => {
+    const ext = language === "sql" ? "sql" : language === "yaml" ? "yaml" : "py";
+    const blob = new Blob([extractedCode], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `artifact.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!extractedCode && !isStreaming) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
@@ -56,13 +67,22 @@ export function CodePreview({ code, language, isStreaming }: CodePreviewProps) {
           )}
         </div>
         {extractedCode && (
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
-          >
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            {copied ? "Copied" : "Copy"}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
+            >
+              <Download className="w-3 h-3" />
+              Download
+            </button>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
+            >
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
         )}
       </div>
 
