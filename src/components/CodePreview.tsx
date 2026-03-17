@@ -67,13 +67,22 @@ export function CodePreview({ code, language, isStreaming }: CodePreviewProps) {
           )}
         </div>
         {extractedCode && (
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
-          >
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            {copied ? "Copied" : "Copy"}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
+            >
+              <Download className="w-3 h-3" />
+              Download
+            </button>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
+            >
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
         )}
       </div>
 
