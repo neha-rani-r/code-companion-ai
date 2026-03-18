@@ -43,15 +43,11 @@ export async function streamArtifact({
       {
         method: "POST",
         headers: {
-          "anthropic-version": "2023-06-01",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `${SYSTEM_PROMPT}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack]}`,
+          systemPrompt: `${SYSTEM_PROMPT}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack]}`,
           messages: messages,
-          stream: true,
         }),
       }
     );
@@ -62,24 +58,43 @@ export async function streamArtifact({
       return;
     }
 
+    const contentType = response.headers.get("content-type") || "";
+
+    // Non-streaming fallback: full JSON with choices[0].message.content
+    if (!contentType.includes("text/event-stream")) {
+      try {
+        const json = await response.json();
+        const content = json?.choices?.[0]?.message?.content;
+        if (content) {
+          onDelta(content);
+          onDone();
+          return;
+        }
+      } catch {}
+      onError("Unexpected response format");
+      return;
+    }
+
+    // Streaming SSE: read chunks progressively
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
+    let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split("\n")
-        .filter(l => l.startsWith("data: "));
-      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
       for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
         const data = line.slice(6).trim();
         if (data === "[DONE]") continue;
         try {
           const parsed = JSON.parse(data);
-          if (parsed.type === "content_block_delta") {
-            onDelta(parsed.delta?.text || "");
-          }
+          const delta = parsed?.choices?.[0]?.delta?.content;
+          if (delta) onDelta(delta);
         } catch {}
       }
     }

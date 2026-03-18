@@ -36,6 +36,7 @@ export default {
           model: "llama-3.3-70b-versatile",
           messages,
           max_tokens: 1000,
+          stream: true,
         }),
       }
     );
@@ -49,8 +50,9 @@ export default {
     return new Response(response.body, {
       status: response.status,
       headers: {
-        ...Object.fromEntries(response.headers),
         ...corsHeaders,
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
       },
     });
   },
