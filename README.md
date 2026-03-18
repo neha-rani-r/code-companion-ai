@@ -1,198 +1,232 @@
-# DataForge.ai — DE Artifact Generator
+# DataForge.ai
 
 > Generate production-ready data engineering code 
-> from plain English. No boilerplate. No copy-paste. 
-> Just describe your pipeline and get code that's 
-> ready to ship.
+> from plain English descriptions.
 
-## Live Demo
-🔗 [Try DataForge.ai — free, no signup](https://neha-rani-r.github.io/code-companion-ai/)
+🔗 **[Try it free — no signup needed](https://neha-rani-r.github.io/code-companion-ai/)**
 
 ---
 
 ## What it does
 
-DataForge.ai turns plain English pipeline descriptions 
-into production-ready code artifacts in seconds.
+Describe your pipeline problem in plain English.
+Get production-ready code in seconds.
 
-**Supported artifacts:**
-- **Airflow DAG** — retry logic, idempotency, 
-  task dependencies, proper operators
-- **dbt Model** — incremental strategy, tests, 
-  schema YAML, on_schema_change handling
-- **PySpark Job** — deduplication, partitioning, 
-  performance optimization
-- **Redshift SQL** — CTAS, sort keys, dist keys, 
-  query optimization patterns
+**Artifacts:**
+Airflow DAG · dbt Model · PySpark Job · Redshift SQL
 
-**Supported clouds:**
-- AWS — S3, Redshift, Glue, boto3, aws-wrangler
-- GCP — BigQuery, GCS, Dataflow, 
-  google-cloud-bigquery
-- Azure — ADLS Gen2, Synapse Analytics, 
-  azure-storage-blob, azure-identity
+**Clouds:**
+AWS · GCP · Azure
 
 ---
 
-## Why I built this
+## What makes it different
 
-I have spent 8 years building production data 
-pipelines at JP Morgan Chase, Citrix and Accenture 
-— and now lead data engineering teams at Deloitte.
-
-The most frustrating part was never the hard 
-problems. It was the repetitive setup — writing 
-the same retry logic, idempotency checks and 
-cloud-specific imports on every single pipeline.
-
-DataForge.ai encodes production DE best practices 
-so engineers can skip the setup and focus on 
-the business logic.
+Most AI tools give you code that works in a 
+notebook. DataForge.ai gives you code that works 
+in production — because every pattern comes from 
+pipelines actually shipped at enterprise scale.
 
 ---
 
-## What makes the output production-ready
+### 1. Cloud-enforced generation
+Not just a label switch. Every service reference, 
+path format, SDK import and auth pattern changes:
+```
+AWS   → S3 (s3://), Redshift, boto3, IAM roles
+GCP   → GCS (gs://), BigQuery, google-cloud-bigquery  
+Azure → ADLS (abfss://), Synapse, azure-storage-blob
+```
 
-Every generated artifact includes:
-
-✅ Error handling with try/except blocks  
-✅ Idempotency — safe to re-run without side effects  
-✅ Inline comments explaining key decisions  
-✅ Cloud-specific services — no generic placeholder code  
-✅ Real connection patterns and path formats  
-✅ Best practice structure for each artifact type  
-✅ Patterns I have reviewed and shipped in production  
+Generic AI tools use boto3 even when you say GCP.
+DataForge.ai enforces cloud-native patterns 
+throughout the entire output.
 
 ---
 
-## How I built this
+### 2. Production-grade system prompt
+The core of the tool — encodes 8 years of 
+production DE knowledge into every output:
 
-Designed and built end to end — from architecture 
-decisions to deployment pipeline.
+- Idempotency by default — safe to re-run
+- Retry with exponential backoff
+- Real error handling — not bare try/except
+- Airflow connection variables — not hardcoded strings
+- Provider-specific operators — not generic Python
+- Late data handling built in
+- Code review ready — no cleanup needed
 
-Key engineering work:
+---
 
-- **System prompt engineering** — the core of the 
-  tool. Encodes production DE best practices, 
-  cloud-specific service patterns, and output 
-  structure that mirrors real code reviews
+### 3. Structured output — code plus context
+
+Every generation follows this structure:
+```
+## Code
+[complete runnable code]
+
+## Why this approach
+[key architectural decisions explained]
+
+## Watch out for
+[common production pitfalls flagged]
+```
+
+You get the code AND the reasoning. Junior DEs 
+learn why, not just what. Senior DEs get the 
+context they'd want in a code review.
+
+---
+
+### 4. Session management without page refresh
+
+Switching cloud or artifact type:
+- Clears conversation context instantly
+- Shows toast confirmation of the switch
+- Resets state cleanly
+- No full page reload needed
+
+Most tools require a full browser refresh to 
+reset context.
+
+---
+
+### 5. API security via Cloudflare Worker proxy
+
+API keys never live in the frontend bundle.
+All AI calls route through a serverless 
+Cloudflare Worker proxy.
+
+Most vibe-coded tools expose the API key 
+directly in browser code. DataForge.ai doesn't.
+
+---
+
+### 6. Download as proper file
+
+One click exports:
+- `artifact.py` for Airflow, Spark, dbt
+- `artifact.sql` for Redshift SQL
+- `artifact.yaml` for data contracts
+
+Drop it straight into your project. 
+No copy-paste required.
+
+---
+
+### 7. Real DE quick-start scenarios
+
+Pre-built chips for actual DE problems:
+- Daily S3 → Snowflake ETL pipeline
+- Incremental dbt model with tests
+- PySpark deduplication job
+- Redshift CTAS with sort keys
+
+Not "write hello world" — real pipeline patterns 
+DEs face every week.
+
+---
+
+### 8. Fully open source with automated CI/CD
+
+- Public GitHub repo — fork and run your own
+- GitHub Actions — automated build and deploy
+- Zero vendor lock-in
+- Cloudflare Worker — swap AI model any time
+
+---
+
+## Why it's different from generic AI
+
+| | Generic AI | DataForge.ai |
+|---|---|---|
+| Idempotency | Rarely | Always |
+| Cloud services | Generic boto3 | Provider-native |
+| Error handling | Basic | Retry with backoff |
+| Connection patterns | Hardcoded | Best practice |
+| Late data handling | Missing | Built in |
+| Output structure | Just code | Code + reasoning |
+| API key security | Exposed | Proxied |
+| Code review ready | Needs rework | Ships as-is |
+
+---
+
+## Who uses this
+
+**Data Engineers** — skip boilerplate, start from 
+a production-quality baseline every time
+
+**Junior DEs** — learn production patterns by 
+example, understand the why behind each decision
+
+**Engineering Managers** — reference implementations 
+for code reviews, standards and onboarding
+
+**Data Architects** — prototype and compare 
+cloud stacks instantly without writing boilerplate
+
+**DE Teams & Consultancies** — consistent quality 
+baseline across all team members from day one
+
+---
+
+## How I built it
+
+End to end — architecture, engineering and 
+deployment pipeline.
+
+- **System prompt engineering** — encodes production 
+  DE best practices, cloud service mapping and 
+  output structure that mirrors real code reviews
 
 - **Multi-cloud routing** — AWS, GCP and Azure 
-  each enforce correct services, path formats, 
-  SDKs and connection patterns throughout the 
-  entire generated output. Not just imports — 
-  every service reference, path and auth pattern 
-  is cloud-specific
+  enforce correct services, path formats, SDKs 
+  and auth patterns throughout entire output
 
-- **Cloudflare Worker proxy** — serverless 
-  architecture that keeps API keys secure and 
-  never exposed in frontend code. All AI calls 
-  route through the Worker
+- **Cloudflare Worker proxy** — serverless security 
+  layer, API keys never exposed in frontend
 
-- **GitHub Actions CI/CD** — fully automated 
-  build and deploy pipeline. Every push to main 
-  triggers a production build and deploys to 
-  GitHub Pages automatically
+- **GitHub Actions CI/CD** — automated build and 
+  deploy on every push to main
 
-- **Streaming architecture** — real-time token 
-  streaming for responsive UX. Handles SSE 
-  format with proper buffer management and 
-  delta extraction
+- **Streaming architecture** — real-time SSE token 
+  streaming with proper buffer management
 
-- **Session management** — conversation context 
-  resets cleanly on cloud or artifact type 
-  switch, with toast notifications and smooth 
-  state transitions — no full page reload needed
+- **Session management** — context resets on 
+  cloud or artifact switch without page reload
 
-- **Static hosting architecture** — solved React 
-  SPA routing, BrowserRouter basename 
-  configuration, asset path resolution and 
-  cache handling for GitHub Pages deployment
-
-- **Security layer** — API key proxy pattern, 
-  environment variable isolation across local 
-  development, CI pipeline and production 
-  environments
+- **Static hosting architecture** — React SPA 
+  routing, asset path resolution and cache 
+  handling for GitHub Pages deployment
 
 ---
 
 ## Tech stack
 
-**Frontend:**
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui
-
-**Backend:**
-- Cloudflare Workers
-- Groq API — Llama 3.3 70B
-- Stateless by design — no database needed
-
-**Infrastructure:**
-- GitHub Actions CI/CD
-- GitHub Pages
-- Cloudflare Workers (edge proxy)
+React · TypeScript · Vite · Tailwind CSS  
+Cloudflare Workers · Groq API (Llama 3.3 70B)  
+GitHub Actions · GitHub Pages
 
 ---
 
-## Architecture
-```
-User describes pipeline problem
-            ↓
-React frontend — GitHub Pages
-            ↓
-Cloudflare Worker (API proxy)
-            ↓
-Groq API — Llama 3.3 70B
-            ↓
-Streaming SSE response
-            ↓
-Code panel — live token streaming
-            ↓
-Download as .py or .sql
-```
-
----
-
-## Running locally
+## Run locally
 ```bash
-# Clone the repo
 git clone https://github.com/neha-rani-r/code-companion-ai
 cd code-companion-ai
-
-# Install dependencies
 npm install
-
-# Add environment variables
 cp .env.example .env
 # Add your VITE_WORKER_URL
-
-# Run locally
 npm run dev
 ```
 
 ---
 
-## Deploying your own version
-
-1. Fork this repo
-2. Set up Cloudflare Worker with your API key
-3. Add `VITE_WORKER_URL` to GitHub secrets
-4. GitHub Actions deploys automatically on push
-
----
-
 ## Roadmap
 
-- [ ] Rate limiting — 5 generations per day 
-      per user
-- [ ] Artifact history — save last 10 generations
-- [ ] More artifact types — data contracts, 
-      schema design, pipeline architecture docs
-- [ ] Follow-up prompts — iterate on generated 
-      code conversationally
-- [ ] User accounts — save and share artifacts
+- [ ] Rate limiting per user
+- [ ] Artifact history — last 10 generations
+- [ ] Data contracts and schema design
+- [ ] Follow-up prompt iteration
 - [ ] Team mode — shared artifact library
 
 ---
@@ -203,25 +237,24 @@ npm run dev
 Engineering Manager & Data Architect  
 HashedIn by Deloitte
 
-8 years building data lakes, data mesh and cloud 
-modernization solutions across JP Morgan Chase, 
-Citrix and Accentine.
+8 years building data lakes, data mesh and 
+cloud modernization at JP Morgan Chase, 
+Citrix and Accenture.
 
-🔗 [LinkedIn](https://www.linkedin.com/in/neha-rani-r/)  
+🔗 [LinkedIn](https://www.linkedin.com/in/neha-rani-r/) · 
 🐙 [GitHub](https://github.com/neha-rani-r)
 
----
-
-## Feedback and collaboration
-
-Tried the tool? I'd love to hear your feedback.  
-Building something in the data engineering space?  
-Always happy to connect and talk architecture.
-
+Tried the tool? Have feedback or want to discuss 
+the architecture?  
 [Connect on LinkedIn →](https://www.linkedin.com/in/neha-rani-r/)
 
 ---
 
-## License
+MIT License
+```
 
-MIT — free to use, fork and build on.
+---
+
+Tell me when Claude Code pushes — then check your README at:
+```
+https://github.com/neha-rani-r/code-companion-ai
