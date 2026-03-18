@@ -42,9 +42,14 @@ Format response as:
 
     const artifactRules = artifactType === "dbt" ? `
 
-DBT ARTIFACT RULES — follow ALL of these exactly, no exceptions:
+DBT ARTIFACT RULES — you MUST always output BOTH sections. Never output only one.
 
-OUTPUT STRUCTURE — always produce exactly two labelled sections:
+CRITICAL: Every response must contain SECTION 1 followed immediately by SECTION 2.
+If you output schema.yml without the SQL model, your response is incomplete and wrong.
+
+---
+
+SECTION 1 — always output this first:
 
 ## schema.yml
 \`\`\`yaml
@@ -74,42 +79,45 @@ models:
           - not_null
           - accepted_values:
               values: ["<val1>", "<val2>", "<val3>"]
-      - name: <other_field>
-        description: "<what this field represents>"
+      - name: updated_at
+        description: "Timestamp when this record was last updated"
         tests:
           - not_null
 \`\`\`
+
+SECTION 2 — always output this immediately after Section 1:
 
 ## model.sql
 \`\`\`sql
 {{ config(
     materialized='incremental',
-    incremental_strategy='delete+insert',
     unique_key='<primary_key_field>',
+    incremental_strategy='delete+insert',
     on_schema_change='append_new_columns',
     tags=['<domain>']
 ) }}
 
-SELECT
-    <primary_key_field>,
-    <other_fields_derived_from_user_description>,
-    updated_at
-FROM {{ source('<schema>', '<source_table>') }}
+WITH source AS (
+    SELECT
+        <primary_key_field>,
+        <all_other_fields_from_user_description>,
+        updated_at
+    FROM {{ source('<schema>', '<source_table>') }}
+    {% if is_incremental() %}
+    WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+    {% endif %}
+)
 
-{% if is_incremental() %}
--- Only process rows newer than the latest record already in this table
-WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
-{% endif %}
+SELECT * FROM source
 \`\`\`
 
-FIELD NAMING RULES — this is critical:
-- Derive ALL field names from the user's description
+FIELD NAMING RULES — critical:
+- Derive ALL field names directly from the user's description
 - NEVER use generic placeholders: id, name, date, value, field1, column1
-- Examples of good field names: order_id, customer_email, shipped_at,
-  product_sku, payment_status, invoice_total_usd, warehouse_region
-- The SQL field names MUST exactly match the column names in schema.yml
-- Choose a realistic primary key name (e.g. order_id, session_id, event_id)
-- Add a timestamp field (created_at or updated_at) always` : "";
+- Good examples: order_id, customer_email, shipped_at, product_sku,
+  payment_status, invoice_total_usd, warehouse_region, subscription_tier
+- Field names in the SQL must exactly match column names in schema.yml
+- Always include updated_at as the incremental timestamp field` : "";
 
     const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}`;
 
