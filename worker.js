@@ -42,38 +42,74 @@ Format response as:
 
     const artifactRules = artifactType === "dbt" ? `
 
-DBT ARTIFACT RULES — follow these exactly:
+DBT ARTIFACT RULES — follow ALL of these exactly, no exceptions:
 
-1. Always output TWO sections in a single response:
-   - Section 1: schema.yml (YAML code block)
-   - Section 2: the .sql model file (SQL code block)
-   Label them clearly: "## schema.yml" and "## model.sql"
+OUTPUT STRUCTURE — always produce exactly two labelled sections:
 
-2. Use realistic field names derived from the user's description.
-   Never use generic placeholders like id/name/date — infer real
-   business fields (e.g. order_id, customer_email, shipped_at).
+## schema.yml
+\`\`\`yaml
+version: 2
 
-3. schema.yml must include:
-   - not_null test on every key/required field
-   - unique test on the primary key
-   - accepted_values test wherever a status/type/category field appears
-   - relationships test for any foreign key column
-   - A meaningful description on the model and each column
-   - tags: list reflecting the business domain (e.g. [finance, orders])
+models:
+  - name: <model_name>
+    description: "<one sentence describing what this model represents>"
+    config:
+      tags: ["<domain>"]
+    columns:
+      - name: <primary_key_field>
+        description: "<what this field represents>"
+        tests:
+          - not_null
+          - unique
+      - name: <foreign_key_field>
+        description: "<what this field represents>"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('<parent_model>')
+              field: <parent_pk>
+      - name: <status_or_type_field>
+        description: "<what this field represents>"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["<val1>", "<val2>", "<val3>"]
+      - name: <other_field>
+        description: "<what this field represents>"
+        tests:
+          - not_null
+\`\`\`
 
-4. The SQL model must include:
-   - {{ config(...) }} block with:
-       materialized='incremental',
-       incremental_strategy='delete+insert',
-       unique_key='<primary_key>',
-       on_schema_change='append_new_columns',
-       tags=[<domain tags>]
-   - A WHERE clause guard for incremental runs:
-       {% if is_incremental() %}
-         WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
-       {% endif %}
-   - Inline SQL comments explaining non-obvious logic
-   - Real field names that match schema.yml exactly` : "";
+## model.sql
+\`\`\`sql
+{{ config(
+    materialized='incremental',
+    incremental_strategy='delete+insert',
+    unique_key='<primary_key_field>',
+    on_schema_change='append_new_columns',
+    tags=['<domain>']
+) }}
+
+SELECT
+    <primary_key_field>,
+    <other_fields_derived_from_user_description>,
+    updated_at
+FROM {{ source('<schema>', '<source_table>') }}
+
+{% if is_incremental() %}
+-- Only process rows newer than the latest record already in this table
+WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+{% endif %}
+\`\`\`
+
+FIELD NAMING RULES — this is critical:
+- Derive ALL field names from the user's description
+- NEVER use generic placeholders: id, name, date, value, field1, column1
+- Examples of good field names: order_id, customer_email, shipped_at,
+  product_sku, payment_status, invoice_total_usd, warehouse_region
+- The SQL field names MUST exactly match the column names in schema.yml
+- Choose a realistic primary key name (e.g. order_id, session_id, event_id)
+- Add a timestamp field (created_at or updated_at) always` : "";
 
     const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}`;
 
