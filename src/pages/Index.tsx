@@ -67,8 +67,8 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
-        <div className="flex items-center gap-2">
+      <header className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
+        <div className="flex items-center gap-3">
           <svg width="32" height="16" viewBox="0 0 32 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <circle cx="4" cy="8" r="3.5" fill="#1D9E75" />
             <line x1="8" y1="8" x2="12" y2="8" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" />
@@ -77,19 +77,28 @@ const Index = () => {
             <line x1="24" y1="8" x2="28" y2="8" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" />
             <polygon points="28,5.5 32,8 28,10.5" fill="#1D9E75" />
           </svg>
-          <h1 className="text-sm font-mono font-semibold text-foreground">
-            DataForge<span className="text-primary">.ai</span>
-          </h1>
+          <div className="flex flex-col gap-0">
+            <h1 className="text-xl font-mono font-bold text-foreground leading-tight">
+              DataForge<span className="text-primary">.ai</span>
+            </h1>
+            <span className="text-xs font-mono text-foreground/60 leading-tight tracking-wide">
+              data engineering artifact generator
+            </span>
+          </div>
         </div>
         <span className="text-xs font-mono text-muted-foreground">
-          built by Neha Rani ·{" "}
+          by{" "}
+          <span className="text-primary font-medium">Neha Rani</span>
+          <span className="mx-1.5 opacity-40">·</span>
+          <span className="text-foreground/50">Engineering Manager &amp; Data Architect</span>
+          <span className="mx-1.5 opacity-40">·</span>
           <a
             href="https://www.linkedin.com/in/neha-rani-r/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:underline ml-1"
+            className="text-primary hover:underline"
           >
-            Connect on LinkedIn ↗
+            Connect ↗
           </a>
         </span>
       </header>
