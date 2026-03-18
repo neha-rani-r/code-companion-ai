@@ -18,9 +18,24 @@ export default {
     const { artifactType, cloudStack, messages: userMessages } = await request.json();
 
     const cloudInstructions = {
-      aws: "Use AWS: S3, Redshift, Glue, boto3, s3:// paths",
-      gcp: "Use GCP: BigQuery, GCS, gs:// paths, google-cloud-bigquery",
-      azure: "Use Azure: ADLS Gen2, Synapse, abfss://, azure-storage-blob",
+      aws: `MANDATORY: Use ONLY AWS services.
+    - Storage: S3 with s3:// paths, boto3
+    - Warehouse: Redshift, RedshiftOperator
+    - ETL: AWS Glue, S3ToRedshiftOperator
+    - Auth: IAM roles, aws_conn_id
+    - NEVER use GCS, BigQuery, ADLS or Azure services`,
+      gcp: `MANDATORY: Use ONLY GCP services.
+    - Storage: GCS with gs:// paths
+    - Warehouse: BigQuery, BigQueryOperator
+    - Transfer: GCSToBigQueryOperator
+    - Auth: service account, gcp_conn_id
+    - NEVER use S3, Redshift, boto3 or AWS services`,
+      azure: `MANDATORY: Use ONLY Azure services.
+    - Storage: ADLS Gen2 with abfss:// paths
+    - Warehouse: Synapse Analytics
+    - SDK: azure-storage-blob, azure-identity
+    - Auth: managed identity
+    - NEVER use S3, GCS, Redshift or AWS/GCP services`,
     };
 
     const basePrompt = env.SYSTEM_PROMPT ||
@@ -135,7 +150,9 @@ FIELD NAMING RULES — critical:
       ? "\n\nThis is a dbt request. You MUST output BOTH schema.yml AND the .sql model file. Two code blocks required."
       : "";
 
-    const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}${dbtReminder}`;
+    const cloudEnforcement = `\n\nCRITICAL: The cloud provider is ${cloudStack.toUpperCase()}. Every single service, import, path, connection ID and SDK must match this cloud provider ONLY. Using any service from a different cloud provider is a critical failure.`;
+
+    const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}${cloudEnforcement}${dbtReminder}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
