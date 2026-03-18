@@ -251,10 +251,3 @@ the architecture?
 ---
 
 MIT License
-```
-
----
-
-Tell me when Claude Code pushes — then check your README at:
-```
-https://github.com/neha-rani-r/code-companion-ai
