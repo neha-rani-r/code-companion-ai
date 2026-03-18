@@ -15,10 +15,35 @@ export default {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    const { systemPrompt, messages: userMessages } = await request.json();
+    const { artifactType, cloudStack, messages: userMessages } = await request.json();
+
+    const cloudInstructions = {
+      aws: "Use AWS: S3, Redshift, Glue, boto3, s3:// paths",
+      gcp: "Use GCP: BigQuery, GCS, gs:// paths, google-cloud-bigquery",
+      azure: "Use Azure: ADLS Gen2, Synapse, abfss://, azure-storage-blob",
+    };
+
+    const basePrompt = env.SYSTEM_PROMPT ||
+      `You are a senior data engineer with 10+ years experience. Generate production-ready code artifacts based on the user's description.
+
+Always include:
+- Proper error handling
+- Idempotency checks
+- Inline comments
+- Cloud-specific services as instructed
+
+Format response as:
+## Code
+\`\`\`python or sql
+[code here]
+\`\`\`
+## Why this approach
+## Watch out for`;
+
+    const systemPrompt = `${basePrompt}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}`;
 
     const messages = [
-      { role: "system", content: systemPrompt || "You are a helpful data engineering assistant" },
+      { role: "system", content: systemPrompt },
       ...userMessages
         .map(({ role, content }) => ({ role, content }))
         .filter(({ content }) => content != null && content !== ""),

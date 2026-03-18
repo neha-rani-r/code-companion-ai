@@ -1,21 +1,3 @@
-const SYSTEM_PROMPT = `You are a senior data engineer 
-with 10+ years experience. Generate production-ready 
-code artifacts based on the user's description.
-
-Always include:
-- Proper error handling
-- Idempotency checks  
-- Inline comments
-- Cloud-specific services as instructed
-
-Format response as:
-## Code
-\`\`\`python or sql
-[code here]
-\`\`\`
-## Why this approach
-## Watch out for`;
-
 export async function streamArtifact({
   messages,
   artifactType,
@@ -31,12 +13,6 @@ export async function streamArtifact({
   onDone: () => void;
   onError: (error: string) => void;
 }) {
-  const cloudInstructions: Record<string, string> = {
-    aws: "Use AWS: S3, Redshift, Glue, boto3, s3:// paths",
-    gcp: "Use GCP: BigQuery, GCS, gs:// paths, google-cloud-bigquery",
-    azure: "Use Azure: ADLS Gen2, Synapse, abfss://, azure-storage-blob",
-  };
-
   try {
     const response = await fetch(
       import.meta.env.VITE_WORKER_URL,
@@ -46,8 +22,9 @@ export async function streamArtifact({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          systemPrompt: `${SYSTEM_PROMPT}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack]}`,
-          messages: messages,
+          artifactType,
+          cloudStack,
+          messages,
         }),
       }
     );
