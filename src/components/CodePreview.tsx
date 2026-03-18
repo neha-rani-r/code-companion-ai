@@ -11,8 +11,13 @@ export function CodePreview({ code, language, isStreaming }: CodePreviewProps) {
   const [copied, setCopied] = useState(false);
 
   const extractedCode = useMemo(() => {
-    const match = code.match(/```[\w]*\n([\s\S]*?)```/);
-    if (match) return match[1].trim();
+    // Prefer sql block (dbt responses have yaml first, sql second)
+    const sqlMatch = code.match(/```sql\n([\s\S]*?)```/);
+    if (sqlMatch) return sqlMatch[1].trim();
+    // Fall back to first code block of any language
+    const anyMatch = code.match(/```[\w]*\n([\s\S]*?)```/);
+    if (anyMatch) return anyMatch[1].trim();
+    // Fall back to raw code heuristic
     if (code.includes("def ") || code.includes("SELECT") || code.includes("import ") || code.includes("CREATE")) {
       return code.trim();
     }
