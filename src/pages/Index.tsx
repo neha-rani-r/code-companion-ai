@@ -69,22 +69,29 @@ const Index = () => {
     <div className="flex flex-col h-screen">
       <header className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-2">
-          <span className="text-lg">⚙️</span>
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="4" cy="8" r="3.5" fill="#1D9E75" />
+            <line x1="8" y1="8" x2="12" y2="8" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" />
+            <polygon points="12,5.5 16,8 12,10.5" fill="#1D9E75" />
+            <circle cx="20" cy="8" r="3.5" fill="#1D9E75" />
+            <line x1="24" y1="8" x2="28" y2="8" stroke="#1D9E75" strokeWidth="1.5" strokeLinecap="round" />
+            <polygon points="28,5.5 32,8 28,10.5" fill="#1D9E75" />
+          </svg>
           <h1 className="text-sm font-mono font-semibold text-foreground">
             DataForge<span className="text-primary">.ai</span>
           </h1>
         </div>
         <span className="text-xs font-mono text-muted-foreground">
-  built by Neha Rani · 
-  <a 
-    href="https://www.linkedin.com/in/neha-rani-r" 
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-primary hover:underline ml-1"
-  >
-    Connect on LinkedIn ↗
-  </a>
-</span>
+          built by Neha Rani ·{" "}
+          <a
+            href="https://www.linkedin.com/in/neha-rani-r/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline ml-1"
+          >
+            Connect on LinkedIn ↗
+          </a>
+        </span>
       </header>
 
       <ConfigBar
