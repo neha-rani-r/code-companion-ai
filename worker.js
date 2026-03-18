@@ -42,10 +42,22 @@ Format response as:
 
     const artifactRules = artifactType === "dbt" ? `
 
-DBT ARTIFACT RULES — you MUST always output BOTH sections. Never output only one.
+CRITICAL FOR DBT: You MUST always output BOTH sections in this exact order with no exceptions:
 
-CRITICAL: Every response must contain SECTION 1 followed immediately by SECTION 2.
-If you output schema.yml without the SQL model, your response is incomplete and wrong.
+FIRST - Output the schema.yml:
+\`\`\`yaml
+[schema content]
+\`\`\`
+
+THEN - Immediately after, output the SQL model:
+\`\`\`sql
+[sql content]
+\`\`\`
+
+NEVER output only the YAML. NEVER output only the SQL. BOTH are required every single time.
+If you output only one section you have failed.
+
+---
 
 ---
 
@@ -119,7 +131,11 @@ FIELD NAMING RULES — critical:
 - Field names in the SQL must exactly match column names in schema.yml
 - Always include updated_at as the incremental timestamp field` : "";
 
-    const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}`;
+    const dbtReminder = artifactType === "dbt"
+      ? "\n\nThis is a dbt request. You MUST output BOTH schema.yml AND the .sql model file. Two code blocks required."
+      : "";
+
+    const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}${dbtReminder}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
