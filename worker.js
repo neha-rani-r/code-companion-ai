@@ -17,20 +17,23 @@ export default {
 
     const { systemPrompt, messages: userMessages } = await request.json();
 
-    const contents = userMessages.map(({ role, content }) => ({
-      role: role === "assistant" ? "model" : role,
-      parts: [{ text: content }],
-    }));
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...userMessages.map(({ role, content }) => ({ role, content })),
+    ];
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${env.GEMINI_API_KEY}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+        },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents,
-          generationConfig: { maxOutputTokens: 1000 },
+          model: "llama-3.3-70b-versatile",
+          messages,
+          max_tokens: 1000,
         }),
       }
     );
