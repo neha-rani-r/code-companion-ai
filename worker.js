@@ -18,8 +18,10 @@ export default {
     const { systemPrompt, messages: userMessages } = await request.json();
 
     const messages = [
-      { role: "system", content: systemPrompt },
-      ...userMessages.map(({ role, content }) => ({ role, content })),
+      { role: "system", content: systemPrompt || "You are a helpful data engineering assistant" },
+      ...userMessages
+        .map(({ role, content }) => ({ role, content }))
+        .filter(({ content }) => content != null && content !== ""),
     ];
 
     const response = await fetch(
