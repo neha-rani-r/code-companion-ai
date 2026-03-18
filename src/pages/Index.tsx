@@ -146,10 +146,10 @@ const Index = () => {
       />
 
       <div className={`flex flex-1 overflow-hidden transition-opacity duration-150 ${clearing ? "opacity-0" : "opacity-100"}`}>
-        <div className="w-[420px] min-w-[320px] border-r border-border flex flex-col">
+        <div className="w-[420px] min-w-[300px] max-w-[480px] border-r border-border flex flex-col overflow-hidden">
           <ChatPanel messages={messages} isLoading={isLoading} onSend={handleSend} />
         </div>
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 min-w-[320px] flex flex-col overflow-hidden">
           <CodePreview code={generatedCode} language={currentLang} isStreaming={isStreaming} />
         </div>
       </div>

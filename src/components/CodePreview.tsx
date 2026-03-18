@@ -52,22 +52,22 @@ export function CodePreview({ code, language, isStreaming }: CodePreviewProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-secondary/30">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-secondary/30 flex-wrap">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="flex gap-1.5 flex-shrink-0">
             <span className="w-3 h-3 rounded-full bg-destructive/60" />
             <span className="w-3 h-3 rounded-full bg-accent/40" />
             <span className="w-3 h-3 rounded-full bg-primary/60" />
           </div>
-          <span className="text-xs font-mono text-muted-foreground ml-2">
+          <span className="text-xs font-mono text-muted-foreground ml-2 truncate">
             artifact.{language === "python" ? "py" : "sql"}
           </span>
           {isStreaming && (
-            <span className="text-xs font-mono text-primary animate-pulse-glow">● streaming</span>
+            <span className="text-xs font-mono text-primary animate-pulse-glow flex-shrink-0">● streaming</span>
           )}
         </div>
         {extractedCode && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={handleDownload}
               className="flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md bg-secondary text-secondary-foreground hover:bg-muted transition-colors"
