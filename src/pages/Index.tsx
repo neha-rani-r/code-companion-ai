@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { ConfigBar } from "@/components/ConfigBar";
 import { ChatPanel } from "@/components/ChatPanel";
@@ -14,8 +14,41 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentLang = ARTIFACT_OPTIONS.find((a) => a.value === artifactType)?.lang || "python";
+
+  const triggerClear = useCallback((toastMessage?: string) => {
+    if (clearTimer.current) clearTimeout(clearTimer.current);
+    setClearing(true);
+    clearTimer.current = setTimeout(() => {
+      setMessages([]);
+      setGeneratedCode("");
+      setClearing(false);
+      if (toastMessage) toast(toastMessage);
+    }, 180);
+  }, []);
+
+  const handleClear = useCallback(() => triggerClear(), [triggerClear]);
+
+  const handleArtifactChange = useCallback(
+    (v: ArtifactType) => {
+      const label = ARTIFACT_OPTIONS.find((a) => a.value === v)?.label ?? v;
+      setArtifactType(v);
+      if (messages.length > 0) triggerClear(`Switched to ${label} — starting fresh session`);
+    },
+    [messages.length, triggerClear]
+  );
+
+  const handleCloudChange = useCallback(
+    (v: CloudStack) => {
+      const label = v.toUpperCase();
+      setCloudStack(v);
+      if (messages.length > 0) triggerClear(`Switched to ${label} — starting fresh session`);
+    },
+    [messages.length, triggerClear]
+  );
 
   const handleSend = useCallback(
     async (input: string) => {
@@ -106,11 +139,13 @@ const Index = () => {
       <ConfigBar
         artifactType={artifactType}
         cloudStack={cloudStack}
-        onArtifactChange={setArtifactType}
-        onCloudChange={setCloudStack}
+        messageCount={messages.length}
+        onArtifactChange={handleArtifactChange}
+        onCloudChange={handleCloudChange}
+        onClear={handleClear}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className={`flex flex-1 overflow-hidden transition-opacity duration-150 ${clearing ? "opacity-0" : "opacity-100"}`}>
         <div className="w-[420px] min-w-[320px] border-r border-border flex flex-col">
           <ChatPanel messages={messages} isLoading={isLoading} onSend={handleSend} />
         </div>
