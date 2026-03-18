@@ -40,7 +40,42 @@ Format response as:
 ## Why this approach
 ## Watch out for`;
 
-    const systemPrompt = `${basePrompt}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}`;
+    const artifactRules = artifactType === "dbt" ? `
+
+DBT ARTIFACT RULES — follow these exactly:
+
+1. Always output TWO sections in a single response:
+   - Section 1: schema.yml (YAML code block)
+   - Section 2: the .sql model file (SQL code block)
+   Label them clearly: "## schema.yml" and "## model.sql"
+
+2. Use realistic field names derived from the user's description.
+   Never use generic placeholders like id/name/date — infer real
+   business fields (e.g. order_id, customer_email, shipped_at).
+
+3. schema.yml must include:
+   - not_null test on every key/required field
+   - unique test on the primary key
+   - accepted_values test wherever a status/type/category field appears
+   - relationships test for any foreign key column
+   - A meaningful description on the model and each column
+   - tags: list reflecting the business domain (e.g. [finance, orders])
+
+4. The SQL model must include:
+   - {{ config(...) }} block with:
+       materialized='incremental',
+       incremental_strategy='delete+insert',
+       unique_key='<primary_key>',
+       on_schema_change='append_new_columns',
+       tags=[<domain tags>]
+   - A WHERE clause guard for incremental runs:
+       {% if is_incremental() %}
+         WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+       {% endif %}
+   - Inline SQL comments explaining non-obvious logic
+   - Real field names that match schema.yml exactly` : "";
+
+    const systemPrompt = `${basePrompt}${artifactRules}\n\nArtifact type: ${artifactType}\nCloud: ${cloudInstructions[cloudStack] || cloudStack}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
