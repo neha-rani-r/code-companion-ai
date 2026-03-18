@@ -17,6 +17,11 @@ export default {
 
     const { systemPrompt, messages: userMessages } = await request.json();
 
+    const contents = userMessages.map(({ role, content }) => ({
+      role: role === "assistant" ? "model" : role,
+      parts: [{ text: content }],
+    }));
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${env.GEMINI_API_KEY}`,
       {
@@ -24,7 +29,7 @@ export default {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: userMessages,
+          contents,
           generationConfig: { maxOutputTokens: 1000 },
         }),
       }
