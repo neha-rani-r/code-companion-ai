@@ -37,13 +37,14 @@ export async function streamArtifact({
     azure: "Use Azure: ADLS Gen2, Synapse, abfss://, azure-storage-blob",
   };
 
+  console.log("API key exists:", !!import.meta.env.VITE_ANTHROPIC_API_KEY);
   try {
     const response = await fetch(
       "https://api.anthropic.com/v1/messages",
       {
         method: "POST",
         headers: {
-          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
+          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY ?? "",
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true",
           "Content-Type": "application/json",
